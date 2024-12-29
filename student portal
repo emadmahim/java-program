@@ -1,0 +1,449 @@
+package sms;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainApp {
+    private static final String HARDCODED_USERNAME = "admin";
+    private static final String HARDCODED_PASSWORD = "password";
+
+    // Lists to store data
+    private List<Student> students = new ArrayList<>();
+    private List<Teacher> teachers = new ArrayList<>();
+    private List<String> attendanceRecords = new ArrayList<>();
+    private List<Subject> subjects = new ArrayList<>();
+
+    public MainApp() {
+        showSplashScreen();
+        showLoginScreen();
+    }
+
+    private void showSplashScreen() {
+        JFrame splash = new JFrame("Splash");
+        JLabel label = new JLabel("Welcome to University Management System", JLabel.CENTER);
+        label.setFont(new Font("Arial", Font.BOLD, 24));
+        splash.add(label);
+        splash.setSize(500, 300);
+        splash.setLocationRelativeTo(null);
+        splash.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        splash.setVisible(true);
+
+        Timer timer = new Timer(3000, e -> splash.dispose());
+        timer.setRepeats(false);
+        timer.start();
+    }
+
+    private void showLoginScreen() {
+        JFrame loginFrame = new JFrame("Login");
+        JLabel userLabel = new JLabel("Username:");
+        JLabel passLabel = new JLabel("Password:");
+        JTextField userField = new JTextField(15);
+        JPasswordField passField = new JPasswordField(15);
+        JButton loginButton = new JButton("Login");
+
+        loginFrame.setLayout(new GridLayout(3, 2));
+        loginFrame.add(userLabel);
+        loginFrame.add(userField);
+        loginFrame.add(passLabel);
+        loginFrame.add(passField);
+        loginFrame.add(loginButton);
+
+        loginButton.addActionListener(e -> {
+            String username = userField.getText();
+            String password = new String(passField.getPassword());
+            if (authenticate(username, password)) {
+                JOptionPane.showMessageDialog(loginFrame, "Login Successful!");
+                loginFrame.dispose();
+                showMainMenu();
+            } else {
+                JOptionPane.showMessageDialog(loginFrame, "Invalid credentials. Try again.");
+            }
+        });
+
+        loginFrame.setSize(400, 200);
+        loginFrame.setLocationRelativeTo(null);
+        loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginFrame.setVisible(true);
+    }
+
+    private boolean authenticate(String username, String password) {
+        return HARDCODED_USERNAME.equals(username) && HARDCODED_PASSWORD.equals(password);
+    }
+
+    private void showMainMenu() {
+        JFrame mainMenu = new JFrame("Main Menu");
+        JButton studentButton = new JButton("Manage Students");
+        JButton teacherButton = new JButton("Manage Teachers");
+        JButton attendanceButton = new JButton("Attendance");
+        JButton feeButton = new JButton("Fee Management");
+        JButton subjectButton = new JButton("Manage Subjects");
+
+        mainMenu.setLayout(new GridLayout(3, 2));
+        mainMenu.add(studentButton);
+        mainMenu.add(teacherButton);
+        mainMenu.add(attendanceButton);
+        mainMenu.add(feeButton);
+        mainMenu.add(subjectButton);
+
+        studentButton.addActionListener(e -> manageStudents());
+        teacherButton.addActionListener(e -> manageTeachers());
+        attendanceButton.addActionListener(e -> manageAttendance());
+        feeButton.addActionListener(e -> manageFees());
+        subjectButton.addActionListener(e -> manageSubjects());
+
+        mainMenu.setSize(400, 300);
+        mainMenu.setLocationRelativeTo(null);
+        mainMenu.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainMenu.setVisible(true);
+    }
+
+    // Student Management
+    private void manageStudents() {
+        JFrame studentFrame = new JFrame("Student Management");
+        JButton addButton = new JButton("Add Student");
+        JButton viewButton = new JButton("View Students");
+
+        studentFrame.setLayout(new GridLayout(2, 1));
+        studentFrame.add(addButton);
+        studentFrame.add(viewButton);
+
+        addButton.addActionListener(e -> showAddStudentForm());
+        viewButton.addActionListener(e -> showStudentList());
+
+        studentFrame.setSize(300, 200);
+        studentFrame.setLocationRelativeTo(null);
+        studentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        studentFrame.setVisible(true);
+    }
+
+    private void showAddStudentForm() {
+        JFrame addStudentFrame = new JFrame("Add Student");
+        JLabel nameLabel = new JLabel("Name:");
+        JLabel ageLabel = new JLabel("Age:");
+        JLabel gradeLabel = new JLabel("Grade:");
+        JLabel idLabel = new JLabel("ID:");
+        JTextField nameField = new JTextField(15);
+        JTextField ageField = new JTextField(15);
+        JTextField gradeField = new JTextField(15);
+        JTextField idField = new JTextField(15);
+        JButton saveButton = new JButton("Save");
+
+        addStudentFrame.setLayout(new GridLayout(5, 2));
+        addStudentFrame.add(idLabel);
+        addStudentFrame.add(idField);
+        addStudentFrame.add(nameLabel);
+        addStudentFrame.add(nameField);
+        addStudentFrame.add(ageLabel);
+        addStudentFrame.add(ageField);
+        addStudentFrame.add(gradeLabel);
+        addStudentFrame.add(gradeField);
+        addStudentFrame.add(saveButton);
+
+        saveButton.addActionListener(e -> {
+            String idText = idField.getText();
+            String name = nameField.getText();
+            String ageText = ageField.getText();
+            String grade = gradeField.getText();
+
+            if (idText.isEmpty() || name.isEmpty() || ageText.isEmpty() || grade.isEmpty()) {
+                JOptionPane.showMessageDialog(addStudentFrame, "Please fill all fields.");
+            } else {
+                try {
+                    int id = Integer.parseInt(idText);
+                    int age = Integer.parseInt(ageText);
+                    students.add(new Student(name, age, grade, id));
+                    JOptionPane.showMessageDialog(addStudentFrame, "Student added successfully!");
+                    addStudentFrame.dispose();
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(addStudentFrame, "ID and Age must be valid numbers.");
+                }
+            }
+        });
+
+        addStudentFrame.setSize(400, 300);
+        addStudentFrame.setLocationRelativeTo(null);
+        addStudentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        addStudentFrame.setVisible(true);
+    }
+
+    private void showStudentList() {
+        JFrame studentListFrame = new JFrame("Student List");
+        JTextArea studentTextArea = new JTextArea(20, 30);
+        studentTextArea.setEditable(false);
+
+        if (students.isEmpty()) {
+            studentTextArea.setText("No students found.");
+        } else {
+            StringBuilder studentDetails = new StringBuilder();
+            for (Student student : students) {
+                studentDetails.append(student).append("\n");
+            }
+            studentTextArea.setText(studentDetails.toString());
+        }
+
+        studentListFrame.add(new JScrollPane(studentTextArea));
+        studentListFrame.setSize(400, 400);
+        studentListFrame.setLocationRelativeTo(null);
+        studentListFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        studentListFrame.setVisible(true);
+    }
+
+    // Teacher Management
+    private void manageTeachers() {
+        JFrame teacherFrame = new JFrame("Teacher Management");
+        JButton addButton = new JButton("Add Teacher");
+        JButton viewButton = new JButton("View Teachers");
+
+        teacherFrame.setLayout(new GridLayout(2, 1));
+        teacherFrame.add(addButton);
+        teacherFrame.add(viewButton);
+
+        addButton.addActionListener(e -> showAddTeacherForm());
+        viewButton.addActionListener(e -> showTeacherList());
+
+        teacherFrame.setSize(300, 200);
+        teacherFrame.setLocationRelativeTo(null);
+        teacherFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        teacherFrame.setVisible(true);
+    }
+
+    private void showAddTeacherForm() {
+        JFrame addTeacherFrame = new JFrame("Add Teacher");
+        JLabel nameLabel = new JLabel("Name:");
+        JLabel subjectLabel = new JLabel("Subject:");
+        JLabel salaryLabel = new JLabel("Salary:");
+        JTextField nameField = new JTextField(15);
+        JTextField subjectField = new JTextField(15);
+        JTextField salaryField = new JTextField(15);
+        JButton saveButton = new JButton("Save");
+
+        addTeacherFrame.setLayout(new GridLayout(4, 2));
+        addTeacherFrame.add(nameLabel);
+        addTeacherFrame.add(nameField);
+        addTeacherFrame.add(subjectLabel);
+        addTeacherFrame.add(subjectField);
+        addTeacherFrame.add(salaryLabel);
+        addTeacherFrame.add(salaryField);
+        addTeacherFrame.add(saveButton);
+
+        saveButton.addActionListener(e -> {
+            String name = nameField.getText();
+            String subject = subjectField.getText();
+            String salary = salaryField.getText();
+
+            if (name.isEmpty() || subject.isEmpty() || salary.isEmpty()) {
+                JOptionPane.showMessageDialog(addTeacherFrame, "Please fill all fields.");
+            } else {
+                teachers.add(new Teacher(name, subject, Double.parseDouble(salary)));
+                JOptionPane.showMessageDialog(addTeacherFrame, "Teacher added successfully!");
+                addTeacherFrame.dispose();
+            }
+        });
+
+        addTeacherFrame.setSize(400, 200);
+        addTeacherFrame.setLocationRelativeTo(null);
+        addTeacherFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        addTeacherFrame.setVisible(true);
+    }
+
+    private void showTeacherList() {
+        JFrame teacherListFrame = new JFrame("Teacher List");
+        JTextArea teacherTextArea = new JTextArea(20, 30);
+        teacherTextArea.setEditable(false);
+
+        if (teachers.isEmpty()) {
+            teacherTextArea.setText("No teachers found.");
+        } else {
+            StringBuilder teacherDetails = new StringBuilder();
+            for (Teacher teacher : teachers) {
+                teacherDetails.append(teacher).append("\n");
+            }
+            teacherTextArea.setText(teacherDetails.toString());
+        }
+
+        teacherListFrame.add(new JScrollPane(teacherTextArea));
+        teacherListFrame.setSize(400, 400);
+        teacherListFrame.setLocationRelativeTo(null);
+        teacherListFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        teacherListFrame.setVisible(true);
+    }
+
+    // Attendance Management
+    private void manageAttendance() {
+        JFrame attendanceFrame = new JFrame("Attendance");
+        JButton markButton = new JButton("Mark Attendance");
+
+        attendanceFrame.setLayout(new FlowLayout());
+        attendanceFrame.add(markButton);
+
+        markButton.addActionListener(e -> markAttendance());
+
+        attendanceFrame.setSize(300, 150);
+        attendanceFrame.setLocationRelativeTo(null);
+        attendanceFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        attendanceFrame.setVisible(true);
+    }
+
+    private void markAttendance() {
+        String studentName = JOptionPane.showInputDialog("Enter Student Name to mark attendance:");
+
+        if (studentName != null && !studentName.isEmpty()) {
+            attendanceRecords.add("Attendance marked for: " + studentName);
+            JOptionPane.showMessageDialog(null, "Attendance marked for " + studentName);
+        }
+    }
+
+    // Fee Management
+    private void manageFees() {
+        JFrame feeFrame = new JFrame("Fee Management");
+        JButton payFeeButton = new JButton("Pay Fee");
+
+        feeFrame.setLayout(new FlowLayout());
+        feeFrame.add(payFeeButton);
+
+        payFeeButton.addActionListener(e -> payFee());
+
+        feeFrame.setSize(300, 150);
+        feeFrame.setLocationRelativeTo(null);
+        feeFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        feeFrame.setVisible(true);
+    }
+
+    private void payFee() {
+        String studentName = JOptionPane.showInputDialog("Enter Student Name to pay fee:");
+
+        if (studentName != null && !studentName.isEmpty()) {
+            JOptionPane.showMessageDialog(null, studentName + "'s fee has been paid.");
+        }
+    }
+
+    // Subject Management
+    private void manageSubjects() {
+        JFrame subjectFrame = new JFrame("Subject Management");
+        JButton addSubjectButton = new JButton("Add Subject");
+        JButton viewSubjectsButton = new JButton("View Subjects");
+
+        subjectFrame.setLayout(new GridLayout(2, 1));
+        subjectFrame.add(addSubjectButton);
+        subjectFrame.add(viewSubjectsButton);
+
+        addSubjectButton.addActionListener(e -> showAddSubjectForm());
+        viewSubjectsButton.addActionListener(e -> showSubjectList());
+
+        subjectFrame.setSize(300, 200);
+        subjectFrame.setLocationRelativeTo(null);
+        subjectFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        subjectFrame.setVisible(true);
+    }
+
+    private void showAddSubjectForm() {
+        JFrame addSubjectFrame = new JFrame("Add Subject");
+        JLabel nameLabel = new JLabel("Subject Name:");
+        JTextField nameField = new JTextField(15);
+        JButton saveButton = new JButton("Save");
+
+        addSubjectFrame.setLayout(new GridLayout(2, 1));
+        addSubjectFrame.add(nameLabel);
+        addSubjectFrame.add(nameField);
+        addSubjectFrame.add(saveButton);
+
+        saveButton.addActionListener(e -> {
+            String subjectName = nameField.getText();
+
+            if (subjectName.isEmpty()) {
+                JOptionPane.showMessageDialog(addSubjectFrame, "Please enter a subject name.");
+            } else {
+                subjects.add(new Subject(subjectName));
+                JOptionPane.showMessageDialog(addSubjectFrame, "Subject added successfully!");
+                addSubjectFrame.dispose();
+            }
+        });
+
+        addSubjectFrame.setSize(300, 150);
+        addSubjectFrame.setLocationRelativeTo(null);
+        addSubjectFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        addSubjectFrame.setVisible(true);
+    }
+
+    private void showSubjectList() {
+        JFrame subjectListFrame = new JFrame("Subject List");
+        JTextArea subjectTextArea = new JTextArea(20, 30);
+        subjectTextArea.setEditable(false);
+
+        if (subjects.isEmpty()) {
+            subjectTextArea.setText("No subjects found.");
+        } else {
+            StringBuilder subjectDetails = new StringBuilder();
+            for (Subject subject : subjects) {
+                subjectDetails.append(subject).append("\n");
+            }
+            subjectTextArea.setText(subjectDetails.toString());
+        }
+
+        subjectListFrame.add(new JScrollPane(subjectTextArea));
+        subjectListFrame.setSize(400, 400);
+        subjectListFrame.setLocationRelativeTo(null);
+        subjectListFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        subjectListFrame.setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(MainApp::new);
+    }
+}
+class Student {
+    private int id;
+    private String name;
+    private int age;
+    private String grade;
+
+    public Student(String name, int age, String grade, int id) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.grade = grade;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+
+    @Override
+    public String toString() {
+        return "ID: " + id + ", Name: " + name + ", Age: " + age + ", Grade: " + grade;
+    }
+}
+
+class Teacher {
+    private String name;
+    private String subject;
+    private double salary;
+
+    public Teacher(String name, String subject, double salary) {
+        this.name = name;
+        this.subject = subject;
+        this.salary = salary;
+    }
+
+    @Override
+    public String toString() {
+        return "Name: " + name + ", Subject: " + subject + ", Salary: " + salary;
+    }
+}
+
+class Subject {
+    private String name;
+
+    public Subject(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Subject: " + name;
+    }
+}
+
